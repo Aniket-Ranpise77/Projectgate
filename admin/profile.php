@@ -7,6 +7,29 @@ if ($_SESSION['role'] != 'admin') {
     header("Location: ../public/home.php");
     exit();
 }
+$udata=mysqli_query($conn,"select * from user where uid='".$_SESSION['uid']."'");
+$userdata = mysqli_fetch_assoc($udata);
+$_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['txtUsername'], $_POST['txtEmail']) ? updateProfile($_POST['txtUsername'], $_POST['txtEmail']) : null;
+
+function updateProfile($username, $email) {
+    global $conn,$userdata;
+    $stmt = $conn->prepare("UPDATE user SET username = ?, email = ? WHERE uid = ?");
+    $stmt->bind_param("ssi", $username, $email, $_SESSION['uid']);
+    $stmt->execute();
+    $stmt->close();
+
+    $userdata['username'] = $username;
+    $userdata['email'] = $email;
+    $_SESSION['username'] = $username;
+    scriptAlert("Profile updated successfully.");
+
+}
+$username =$_POST['txtUsername'];
+$email = $_POST['txtEmail'];  
+updateProfile($username, $email);
+function scriptAlert($message) {
+    echo "<script>alert('" . addslashes($message) . "');</script>";
+}  
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -53,15 +76,15 @@ if ($_SESSION['role'] != 'admin') {
                     <span id="lblMsg" style="font-weight:bold; margin-bottom:15px; display:block;"></span>
                     <div class="form-group">
                         <label>Username</label>
-                        <input type="text" id="txtUsername" class="form-control" required />
+                        <input type="text" id="txtUsername"  class="form-control" required value="<?php echo htmlspecialchars($userdata['username']); ?>" />
                     </div>
                     <div class="form-group">
                         <label>Email Address</label>
-                        <input type="email" id="txtEmail" class="form-control" required pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$" />
+                        <input type="email" id="txtEmail" class="form-control" required pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$" value="<?php echo htmlspecialchars($userdata['email']); ?>" />
                     </div>
                 </div>
                 <div class="auth-footer">
-                    <button type="submit" id="btnUpdateProfile" class="btn-submit">Save Changes</button>
+                    <button type="submit" id="btnUpdateProfile" onclick="" class="btn-submit">Save Changes</button>
                 </div>
             </div>
         </div>

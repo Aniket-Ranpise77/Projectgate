@@ -48,18 +48,12 @@ $users = mysqli_query($conn, "SELECT * FROM user where role='faculty'");
 if (isset($_POST['btnadd'])) {
     $username = $_POST['txtuname'] ?? '';
     $email = $_POST['txtemail'] ?? '';
-    $password = $_POST['txtpwd'] ?? '';
+    $password = md5($_POST['txtpwd'])?? '';
     $role = $_POST['ddirole'] ?? '';
     $sendEmail = isset($_POST['cbemail']);
     addUser($username, $email, $password, $role, $sendEmail);
 }
-function addUser(
-    $username,
-    $email,
-    $password,
-    $role,
-    $sendEmail
-) {
+function addUser($username,$email,$password,$role,$sendEmail) {
     global $conn;
     $stmt = $conn->prepare("INSERT INTO user (username, email, password, role) VALUES (?, ?, ?, ?)");
     $stmt->bind_param("ssss", $username, $email, $password, $role);

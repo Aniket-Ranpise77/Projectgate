@@ -126,7 +126,7 @@ function addUser(
     <div id="pnicontant" class="contant">
         <div class="student-page-header">
             <div><h1>Faculty Management</h1><p>Manage and monitor faculty information</p></div>
-            <a id="btnaddfaculty" type="button" href="addfact." class="btn-primary">+ Add Faculty</a>
+            <a id="btnaddfaculty" type="button" href="addfact.php" class="btn-primary" style="text-decoration: none;">+ Add Faculty</a>
         </div>
         <div class="statusbar">
             <div class="card">

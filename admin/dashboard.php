@@ -9,7 +9,9 @@ if ($_SESSION['role'] != 'admin') {
 }
 
 $facultys = mysqli_query($conn, "SELECT tblfaculty.* ,subject.subject  FROM tblfaculty,`user`,subject   where `user`.uid=tblfaculty.uid and subject.subid=tblfaculty.subid  ");
-$student = mysqli_query($conn, "SELECT tblstud.* FROM tblstud,`user` where `user`.uid=tblstud.uid ");
+$students = mysqli_query($conn, "SELECT tblstud.* FROM tblstud,`user` where `user`.uid=tblstud.uid ");
+$Projects = mysqli_query($conn, "SELECT * FROM tblproject where status='Approved' ");
+$pandingProjects = mysqli_query($conn, "SELECT * FROM tblproject where status='Pending' and status='Need Modification' ");
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -23,7 +25,7 @@ $student = mysqli_query($conn, "SELECT tblstud.* FROM tblstud,`user` where `user
     <form id="form1">
         <div id="Panel1" class="topbar">
             <img id="logo" class="logo" alt="Project-Gate Logo" src="../Admin/img/logo_admin.png" />
-            <span id="lbluname">welcome<?php echo $_SESSION['username']; ?></span>
+            <span id="lbluname" style="margin: 0; color:dimgrey;">Welcome : <?php echo $_SESSION['username']; ?></span>
             <span id="Label20"></span>
             <div class="topbar-right">
                 <a id="hidash" class="nav-link" href="dashboard.php">Dashboard</a>
@@ -45,10 +47,10 @@ $student = mysqli_query($conn, "SELECT tblstud.* FROM tblstud,`user` where `user
 
         <div id="pnicontant" class="contant">
             <div class="statusbar">
-                <div class="card"><span id="Label1">Total Students</span><span id="Ibiscount"></span></div>
-                <div class="card"><span id="Label3">Total Faculty</span><span id="lbifcount"></span></div>
-                <div class="card"><span id="Label5">Pending Forms</span><span id="Ibiforms"></span></div>
-                <div class="card"><span id="Label7">Approved Forms</span><span id="lblaform"></span></div>
+                <div class="card"><span id="Label1">Total Students</span><span id="Ibiscount"><?php echo mysqli_num_rows($students) ?></span></div>
+                <div class="card"><span id="Label3">Total Faculty</span><span id="lbifcount"><?php echo mysqli_num_rows($facultys) ?></span></div>
+                <div class="card"><span id="Label5">Aproved Project</span><span id="Ibiforms"><?php echo mysqli_num_rows($Projects) ?></span></div>
+                <div class="card"><span id="Label7">Project to Aprove</span><span id="lblaform"><?php echo mysqli_num_rows($pandingProjects) ?></span></div>
             </div>
         </div>
     </form>

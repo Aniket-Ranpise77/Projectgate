@@ -1,10 +1,14 @@
 <?php
+
 require_once __DIR__. '/../contoler/db.php';
 $error_message = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $username=$_POST['username'];
 $password=$_POST['password'];
-$login=mysqli_query($conn,"select * from user where username='$username' and password='$password' and status='Active'");
+$hashed_password = "";
+$hashed_password = md5($password);
+
+$login=mysqli_query($conn,"select * from user where username='$username' and password='$hashed_password' and status='Active'");
 if (mysqli_num_rows($login)>0) {
     $result=mysqli_fetch_assoc($login);
     $_SESSION['uid']=$result['uid'];
