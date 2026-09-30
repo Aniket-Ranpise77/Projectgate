@@ -8,7 +8,7 @@ if ($_SESSION['role'] != 'admin') {
     exit();
 }
 
-$facultys = mysqli_query($conn, "SELECT tblfaculty.* ,subject.subject  FROM tblfaculty,`user`,subject   where `user`.uid=tblfaculty.uid and subject.subid=tblfaculty.subid  ");
+$facultys = mysqli_query($conn, "SELECT tblfaculty.*   FROM tblfaculty,`user`   where `user`.uid=tblfaculty.uid  ");
 $students = mysqli_query($conn, "SELECT tblstud.* FROM tblstud,`user` where `user`.uid=tblstud.uid ");
 $Projects = mysqli_query($conn, "SELECT * FROM tblproject where status='Approved' ");
 $pandingProjects = mysqli_query($conn, "SELECT * FROM tblproject where status='Pending' and status='Need Modification' ");

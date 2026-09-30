@@ -7,29 +7,29 @@ if ($_SESSION['role'] != 'admin') {
     header("Location: ../public/home.php");
     exit();
 }
+
+
+
+if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['txtusername'], $_POST['txtemail'])) {
+    
+        $username = mysqli_real_escape_string($conn, $_POST['txtusername']);
+        $email = mysqli_real_escape_string($conn, $_POST['txtemail']);
+
+        // Update the user's profile in the database
+        $updateQuery = "UPDATE `user` SET username='$username', email='$email' WHERE uid='"  . $_SESSION['uid'] . "';";
+        if(mysqli_query($conn, $updateQuery)) {
+            scriptAlert("Profile updated successfully.");
+        }
+        else {
+            scriptAlert("Error updating profile: " . mysqli_error($conn));
+        }
+    }
+function scriptAlert($updatedMessage) {
+    echo "<script>alert('" . addslashes($updatedMessage) . "');</script>";
+    
+}  
 $udata=mysqli_query($conn,"select * from user where uid='".$_SESSION['uid']."'");
 $userdata = mysqli_fetch_assoc($udata);
-$_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['txtUsername'], $_POST['txtEmail']) ? updateProfile($_POST['txtUsername'], $_POST['txtEmail']) : null;
-
-function updateProfile($username, $email) {
-    global $conn,$userdata;
-    $stmt = $conn->prepare("UPDATE user SET username = ?, email = ? WHERE uid = ?");
-    $stmt->bind_param("ssi", $username, $email, $_SESSION['uid']);
-    $stmt->execute();
-    $stmt->close();
-
-    $userdata['username'] = $username;
-    $userdata['email'] = $email;
-    $_SESSION['username'] = $username;
-    scriptAlert("Profile updated successfully.");
-
-}
-$username =$_POST['txtUsername'];
-$email = $_POST['txtEmail'];  
-updateProfile($username, $email);
-function scriptAlert($message) {
-    echo "<script>alert('" . addslashes($message) . "');</script>";
-}  
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -51,16 +51,16 @@ function scriptAlert($message) {
     </style>
 </head>
 <body> 
-<form id="form1">
+<form id="form1" method="post" action="profile.php">
     <div id="Panel1" class="topbar">
         <img id="logo" class="logo" alt="Project-Gate Logo" src="../Admin/img/logo_admin.png" />
-        <span id="lbluname" style="float: right; margin: 60px 40px 0 0; font-size: 18px; font-weight:bold; color:White;">[Username]</span>
+        <span id="lbluname" style="float: right; margin:  0 0; font-size: 18px; font-weight:bold; color:#0077BE;"><?php echo htmlspecialchars($userdata['username']); ?></span>
     </div>
     <div id="pnsidebar" class="sidebar"><br /><br /><br />
         <a id="lbtndash" href="dashboard.php">Dashboard</a>
         <a id="Ibtnfact" href="profile.php" style="font-weight:bold; color:#ffeb3b;">Profile</a>
         <a id="Ibtnstud0" href="studmang.php">Students</a>
-        <a id="Ibtnfact" href="factmang.php">Facultys</a>
+        <a id="Ibtnfact" href="factmang.php">Facultys</a> 
         <a id="lbtupwd" href="pwdchange.php">Password Change</a>
         <a id="lbtnaddu" href="adduser.php">Add User</a>
         <a id="LinkButton1" href="../public/logout.php">Log Out</a><br/>
@@ -76,15 +76,15 @@ function scriptAlert($message) {
                     <span id="lblMsg" style="font-weight:bold; margin-bottom:15px; display:block;"></span>
                     <div class="form-group">
                         <label>Username</label>
-                        <input type="text" id="txtUsername"  class="form-control" required value="<?php echo htmlspecialchars($userdata['username']); ?>" />
+                        <input type="text" id="txtUsername" name="txtusername" class="form-control" required value="<?php echo htmlspecialchars($userdata['username']); ?>" />
                     </div>
                     <div class="form-group">
                         <label>Email Address</label>
-                        <input type="email" id="txtEmail" class="form-control" required pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$" value="<?php echo htmlspecialchars($userdata['email']); ?>" />
+                        <input type="email" id="txtEmail" name="txtemail" class="form-control" required pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$" value="<?php echo htmlspecialchars($userdata['email']); ?>" />
                     </div>
                 </div>
                 <div class="auth-footer">
-                    <button type="submit" id="btnUpdateProfile" onclick="" class="btn-submit">Save Changes</button>
+                    <button type="submit" id="btnUpdateProfile" class="btn-submit">Save Changes</button>
                 </div>
             </div>
         </div>

@@ -43,14 +43,18 @@ if (isset($_GET['action']) && $_GET['action'] === 'change_status' && isset($_GET
     }
 }
 $users = mysqli_query($conn, "SELECT * FROM user");
-
+$subjects = mysqli_query($conn, "SELECT * FROM subject");
 
 if (isset($_POST['btnadd'])) {
     $username = $_POST['txtuname'] ?? '';
     $email = $_POST['txtemail'] ?? '';
     $password = $_POST['txtpwd'] ?? '';
     $role = $_POST['ddirole'] ?? '';
+    $gender = $_POST['ddigender'] ?? '';
+    $class = $_POST['ddiclass'] ?? '';
+
     $sendEmail = isset($_POST['cbemail']);
+
     addUser($username, $email, $password, $role, $sendEmail);
 }
 function addUser(
@@ -266,8 +270,8 @@ function addUser(
                         <label id="IblEmail" class="form-label">Password</label>
                         <input type="password" id="txtpwd" name="txtpwd" class="form-input" required />
                     </div>
-                    <div class="form-group">
-                        <label id="Label1" class="form-label">Role</label>
+                    <div class="form-group" id="role-group">
+                        <label id="urole" class="form-label">Role</label>
                         <select id="ddirole" name="ddirole" class="form-input" required>
                             <option value="">-- Select Role --</option>
                             <option value="admin">Admin</option>
@@ -275,6 +279,7 @@ function addUser(
                             <option value="student">Student</option>
                         </select>
                     </div>
+                                      
                     <div class="checkbox-group" style="margin-bottom: 20px;">
                         <label class="custom-checkbox"><input type="checkbox" id="cbemail" name="cbemail" /> Send account information to the user by email</label>
                     </div>
@@ -322,6 +327,7 @@ function addUser(
             </div>
         </div>
     </form>
+
 </body>
 
 </html>

@@ -108,7 +108,7 @@ function addUser(
     <div id="Panel1" class="topbar">
         <img id="logo" class="logo" alt="Project-Gate Logo" src="../Admin/img/logo_admin.png" />
         <div class="topbar-right">
-            <span style="float: left; margin: 15px 20px 0 0; font-size: 16px; font-weight: bold; color: white;">Admin: [Username]</span>
+            <span style="float: left; margin:  0 0; font-size: 16px; font-weight: bold; color: #0077BE;">Admin: <?php echo htmlspecialchars($_SESSION['username']) ?> </span>
             <a id="hidash" class="nav-link" href="dashboard.php">Dashboard</a>
             <a id="hlhome" class="nav-link" href="home.php">Home</a>
             <a id="hllout" class="nav-link"  href="../public/logout.php" type="button" style="border:none; background:none;">Log Out</a>
