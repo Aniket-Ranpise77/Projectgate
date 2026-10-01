@@ -27,7 +27,7 @@ if ($_SESSION['role'] != 'faculty') {
     </style>
 </head>
 <body> 
-<form id="form1">
+<form id="form1" method="post">
 <div>
     <div id="Panel1" class="topbar">
         <img id="logo" class="logo" alt="Project-Gate Logo" src="../Admin/img/logo_admin.png" />
