@@ -1,11 +1,56 @@
-<?php require_once __DIR__ . '/../contoler/db.php'; 
+<?php 
+require_once __DIR__ . '/../contoler/db.php'; 
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 1. Session & Role Validation
 if (!isset($_SESSION['uid'])) {
     header("Location: ../public/login.php");
     exit();
 }
-if ($_SESSION['role'] != 'faculty') {
+if ($_SESSION['role'] !== 'faculty') {
     header("Location: ../public/home.php");
     exit();
+}
+
+// 2. Form Submission Handling (Prepared Statement + UPSERT)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['btnSave'])) {
+    $pid = trim($_POST['btnSave']);
+    
+    if (isset($_POST['txtScore'][$pid]) &&$_POST['txtScore'][$pid] !== '') {$score = trim($_POST['txtScore'][$pid]);
+        
+        // Inserts score if row doesn't exist, otherwise updates existing row
+        $stmt = mysqli_prepare($conn, "INSERT INTO `tblscore` (pid, score) VALUES (?, ?) 
+                                       ON DUPLICATE KEY UPDATE score = ?");
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "sss", $pid, $score,$score);
+            if (mysqli_stmt_execute($stmt)) {
+                Reviewmessage("Review Saved Successfully");
+            } else {
+                Reviewmessage("Database Error: " . mysqli_stmt_error($stmt));
+            }
+            mysqli_stmt_close($stmt);
+        }
+    } else {
+        Reviewmessage("Please Enter a Score");
+    }
+}
+
+// 3. Fetch Projects for Current Logged-In Faculty Only
+$uid =$_SESSION['uid'];
+$stmt = mysqli_prepare($conn, "SELECT tblproject.*, tblscore.score 
+                               FROM tblproject 
+                               INNER JOIN tblfaculty ON tblfaculty.subid = tblproject.subid 
+                               LEFT JOIN tblscore ON tblscore.pid = tblproject.pid 
+                               WHERE tblfaculty.uid = ?");
+mysqli_stmt_bind_param($stmt, "s", $uid);
+mysqli_stmt_execute($stmt);
+$projects = mysqli_stmt_get_result($stmt);
+
+function Reviewmessage($message) {
+    echo "<script>alert('" . addslashes($message) . "');</script>";
 }
 ?>
 <!DOCTYPE html>
@@ -32,7 +77,9 @@ if ($_SESSION['role'] != 'faculty') {
     <div id="Panel1" class="topbar">
         <img id="logo" class="logo" alt="Project-Gate Logo" src="../Admin/img/logo_admin.png" />
         <div class="topbar-right">
-            <span style="float: left; margin: 15px 20px 0 0; font-size: 16px; font-weight: bold; color: green;">Faculty: [Username]</span>
+            <span style="float: left; margin: 0 20px 0 0; font-size: 16px; font-weight: bold; color: green;">
+                Faculty: <?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?>
+            </span>
             <a id="hldash" class="nav-link" href="dashboard.php">Dashboard</a>
             <a id="hlhome" class="nav-link" href="home.php">Home</a>
             <a id="hllout" class="nav-link" href="../public/logout.php">Log Out</a>
@@ -44,7 +91,7 @@ if ($_SESSION['role'] != 'faculty') {
         <a id="Ibtnproject" href="reviewproject.php">Student Projects</a>
         <a id="Ibtnresult" href="grad.php" style="font-weight:bold; color:#ffeb3b;">Student Results</a>
         <a id="Ibtnupwd" href="pwdchange.php">Password Change</a>
-        <a id="Ibtlout" href="../public/logout. php">Log Out</a>
+        <a id="Ibtlout" href="../public/logout.php">Log Out</a>
     </div>
     <div id="pnicontant" class="contant">
         <div class="page-header">
@@ -59,18 +106,35 @@ if ($_SESSION['role'] != 'faculty') {
                         <th>Student ID</th>
                         <th>Project Title</th>
                         <th>Status</th>
+                        <th>Project Id</th>
                         <th>Score</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
+                    <?php while ($project = mysqli_fetch_assoc($projects)) { ?>
                     <tr>
-                        <td>[ID]</td>
-                        <td>[Title]</td>
-                        <td>[Status]</td>
-                        <td><input type="number" id="txtScore" class="form-input" placeholder="0-100" min="0" max="100" /></td>
-                        <td><button type="button" class="btn-action">Save Score</button></td>
+                        <td><?php echo htmlspecialchars($project['sid'] ?? ''); ?></td>
+                        <td><?php echo htmlspecialchars($project['title'] ?? ''); ?></td>
+                        <td><?php echo htmlspecialchars($project['status'] ?? ''); ?></td>
+                        <td><?php echo htmlspecialchars($project['pid'] ?? ''); ?></td>
+                        <td>
+                            <input type="number" 
+                                   name="txtScore[<?php echo htmlspecialchars($project['pid']); ?>]" 
+                                   value="<?php echo htmlspecialchars($project['score'] ?? ''); ?>" 
+                                   class="form-input" 
+                                   placeholder="0-100" 
+                                   min="0" 
+                                   max="100" />
+                        </td>
+                        <td>
+                            <button type="submit" 
+                                    name="btnSave" 
+                                    value="<?php echo htmlspecialchars($project['pid']); ?>" 
+                                    class="btn-action">Save Score</button>
+                        </td>
                     </tr>
+                    <?php } ?>
                 </tbody>
             </table>
         </div>
