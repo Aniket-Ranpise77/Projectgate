@@ -7,6 +7,54 @@ if ($_SESSION['role'] != 'student') {
     header("Location: ../public/home.php");
     exit();
 }
+$user=mysqli_query($conn, "SELECT * FROM user where uid='" . $_SESSION['uid'] . "'");
+$udata=mysqli_fetch_assoc($user);
+$pwd=$udata['password'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['txtOldPwd'], $_POST['txtNewPwd'], $_POST['txtConfirmPwd'])) {
+    if(md5($_POST['txtOldPwd']) !== $pwd) {
+        $message = "Current password is incorrect.";
+        changalert($message);
+    } elseif ($_POST['txtNewPwd'] === $_POST['txtOldPwd']) {
+        $message = "New password cannot be the same as the current password.";
+        changalert($message);
+    } elseif (strlen($_POST['txtNewPwd']) < 8) {
+        $message = "New password must be at least 8 characters long.";
+        changalert($message);
+    } elseif (!preg_match('/[A-Z]/', $_POST['txtNewPwd'])) {
+        $message = "New password must contain at least one uppercase letter.";
+        changalert($message);
+    } elseif (!preg_match('/[a-z]/', $_POST['txtNewPwd'])) {
+        $message = "New password must contain at least one lowercase letter.";
+        changalert($message);
+    } elseif (!preg_match('/[0-9]/', $_POST['txtNewPwd'])) {
+        $message = "New password must contain at least one number.";
+        changalert($message);
+    } elseif (!preg_match('/[\W_]/', $_POST['txtNewPwd'])) {
+        $message = "New password must contain at least one special character.";
+        changalert($message);
+    } else {
+
+    if ($_POST['txtNewPwd'] !== $_POST['txtConfirmPwd']) {
+        $message = "New password and confirm password do not match.";
+        changalert($message);
+    } else {
+        $pwdupdate = mysqli_query($conn, "UPDATE `user` SET password='" . md5($_POST['txtNewPwd']) . "' WHERE uid='" . $_SESSION['uid'] . "' AND password='" . md5($_POST['txtOldPwd']) . "'");
+    
+    if ($pwdupdate) {
+        $message = "Password updated successfully.";
+        changalert($message);
+    } else {
+        $message = "Error updating password: " . mysqli_error($conn);
+        changalert($message);
+    }
+    }
+
+}}
+function changalert($changmsg)
+{
+    echo "<script>alert('" . $changmsg . "');</script>";
+}
+
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"> 
@@ -29,45 +77,46 @@ if ($_SESSION['role'] != 'student') {
     </style>
 </head>
 <body> 
-<form id="form1">
+<form id="form1" method="POST">
     <div id="Panel1" class="topbar">
         <img id="logo" class="logo" alt="Project-Gate Logo" src="../Admin/img/logo_admin.png" />
         <span style="float: right; margin: 60px 40px 0 0; font-size: 18px; font-weight: bold; color: green;">Admin: [Username]</span>
     </div>
     <div id="pnsidebar" class="sidebar"><br />
-        
+        <a id="lbtrndash" href="dashboard.php">Dashboard</a>
         <a id="Ibtnpro" href="profile.php">My Profile</a>
-        <a id="Ibtnproject" href="project.php">My Projects</a>
-        <a id="Ibtnresult" href="results.php">Student Results</a>
+        <a id="Ibtnproject" href="project.php">Submit Projects</a>
+        <a id="Ibtnresult" href="result.php">Student Results</a>
         <a id="Ibtnfact" href="pwdchange.php" style="font-weight:bold; color:#ffeb3b;">Password Change</a>
         <a id="Ibtlout" href="../public/logout.php">Log Out</a>
     </div>
     <div class="contant login-container">
-        <div class="auth-card">
-            <div class="auth-header">
-                <h2>Change Password</h2>
-                <p style="margin: 0; font-size: 14px; opacity: 0.9;">Ensure your account is using a strong password to stay secure.</p>
-            </div>
-            <div class="auth-body">
-                <span id="lblMsg" style="font-weight:bold; margin-bottom:15px; display:block;"></span>
-                <div class="form-group">
-                    <label>Current Password</label>
-                    <input type="password" id="txtOldPwd" class="form-control" required />
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h2>Change Password</h2>
+                    <p style="margin: 0; font-size: 14px; opacity: 0.9;">Ensure your account is using a strong password to stay secure.</p>
                 </div>
-                <div class="form-group">
-                    <label>New Password</label>
-                    <input type="password" id="txtNewPwd" class="form-control" required />
+                <div class="auth-body">
+                    <span id="lblMsg" style="font-weight:bold; margin-bottom:15px; display:block;"></span>
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" name="txtOldPwd" id="txtOldPwd" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+
+                        <label>New Password</label>
+                        <input type="password" name="txtNewPwd" id="txtNewPwd" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" name="txtConfirmPwd" id="txtConfirmPwd" class="form-control" required />
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Confirm New Password</label>
-                    <input type="password" id="txtConfirmPwd" class="form-control" required />
+                <div class="auth-footer">
+                    <button type="submit" id="btnChangePwd" class="btn-submit">Update Password</button>
                 </div>
-            </div>
-            <div class="auth-footer">
-                <button type="submit" id="btnChangePwd" class="btn-submit">Update Password</button>
             </div>
         </div>
-    </div>
 </form>
 </body>
 </html>

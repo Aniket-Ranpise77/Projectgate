@@ -43,8 +43,8 @@ if ($_SESSION['role'] != 'student') {
     <div id="pnsidebar" class="sidebar">
         <a id="lbtndash" href="dashboard.php">Dashboard</a>
         <a id="Ibtnpro" href="profile.php">My Profile</a>
-        <a id="lbtnproject" href="submitproject.php" style="font-weight:bold; color:#ffeb3b;">My Project</a>
-        <a id="lbtnresult" href="results.php">My Results</a>
+        <a id="lbtnproject" href="project.php" style="font-weight:bold; color:#ffeb3b;">Submit Project</a>
+        <a id="lbtnresult" href="result.php">My Results</a>
         <a id="lbtnupwd" href="pwdchange.php">Password Change</a>
         <a id="Ibtlout" href="../public/logout.php">Log Out</a>
     </div>

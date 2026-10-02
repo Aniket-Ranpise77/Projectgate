@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['btnSave'])) {
     if (isset($_POST['txtScore'][$pid]) &&$_POST['txtScore'][$pid] !== '') {$score = trim($_POST['txtScore'][$pid]);
         
         // Inserts score if row doesn't exist, otherwise updates existing row
-        $stmt = mysqli_prepare($conn, "INSERT INTO `tblscore` (pid, score) VALUES (?, ?) 
+        $stmt = mysqli_prepare($conn, "INSERT INTO `tblscore` (sid,score) VALUES (?, ?) 
                                        ON DUPLICATE KEY UPDATE score = ?");
         if ($stmt) {
             mysqli_stmt_bind_param($stmt, "sss", $pid, $score,$score);
@@ -40,14 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['btnSave'])) {
 
 // 3. Fetch Projects for Current Logged-In Faculty Only
 $uid =$_SESSION['uid'];
-$stmt = mysqli_prepare($conn, "SELECT tblproject.*, tblscore.score 
-                               FROM tblproject 
-                               INNER JOIN tblfaculty ON tblfaculty.subid = tblproject.subid 
-                               LEFT JOIN tblscore ON tblscore.pid = tblproject.pid 
-                               WHERE tblfaculty.uid = ?");
-mysqli_stmt_bind_param($stmt, "s", $uid);
-mysqli_stmt_execute($stmt);
-$projects = mysqli_stmt_get_result($stmt);
+$scores = mysqli_query($conn, "SELECT * FROM `tblscore` , tblfaculty,tblproject WHERE `tblscore`.`subid`=tblfaculty.subid AND tblfaculty.uid=1 and tblproject.status='Completed'");
 
 function Reviewmessage($message) {
     echo "<script>alert('" . addslashes($message) . "');</script>";
@@ -106,21 +99,19 @@ function Reviewmessage($message) {
                         <th>Student ID</th>
                         <th>Project Title</th>
                         <th>Status</th>
-                        <th>Project Id</th>
                         <th>Score</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while ($project = mysqli_fetch_assoc($projects)) { ?>
+                    <?php while ($project = mysqli_fetch_assoc($scores)) { ?>
                     <tr>
                         <td><?php echo htmlspecialchars($project['sid'] ?? ''); ?></td>
                         <td><?php echo htmlspecialchars($project['title'] ?? ''); ?></td>
                         <td><?php echo htmlspecialchars($project['status'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($project['pid'] ?? ''); ?></td>
                         <td>
                             <input type="number" 
-                                   name="txtScore[<?php echo htmlspecialchars($project['pid']); ?>]" 
+                                   name="txtScore[<?php echo htmlspecialchars($project['sid']); ?>]" 
                                    value="<?php echo htmlspecialchars($project['score'] ?? ''); ?>" 
                                    class="form-input" 
                                    placeholder="0-100" 
@@ -130,7 +121,7 @@ function Reviewmessage($message) {
                         <td>
                             <button type="submit" 
                                     name="btnSave" 
-                                    value="<?php echo htmlspecialchars($project['pid']); ?>" 
+                                    value="<?php echo htmlspecialchars($project['sid']); ?>" 
                                     class="btn-action">Save Score</button>
                         </td>
                     </tr>

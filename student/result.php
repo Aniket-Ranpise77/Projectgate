@@ -7,6 +7,7 @@ if ($_SESSION['role'] != 'student') {
     header("Location: ../public/home.php");
     exit();
 }
+$results = mysqli_query($conn, "SELECT tblscore.*, tblproject.title FROM tblscore INNER JOIN tblproject ON tblscore.subid = tblproject.subid WHERE tblproject.uid='{$_SESSION['uid']}'");
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -44,8 +45,8 @@ if ($_SESSION['role'] != 'student') {
     <div id="pnsidebar" class="sidebar">
         <a id="lbtrndash" href="dashboard.php">Dashboard</a>
         <a id="Ibtnpro" href="profile.php">My Profile</a>
-        <a id="Ibtnsubmit" href="submitproject.php">Submit Project</a>
-        <a id="Ibtnresult" href=" results.php" style="font-weight:bold; color: #ffeb3b;">My Results</a>
+        <a id="Ibtnproject" href="project.php">Submit Project</a>
+        <a id="Ibtnresult" href=" result.php" style="font-weight:bold; color: #ffeb3b;">My Results</a>
         <a id="Ibtnupwd" href="pwdchange.php">Password Change</a>
         <a id="Ibtlout" href="../public/logout.php">Log Out</a>
     </div>
@@ -61,17 +62,20 @@ if ($_SESSION['role'] != 'student') {
                     <tr>
                         <th>Project Title</th>
                         <th>Subject</th>
-                        <th>Project Status</th>
                         <th>Final Score</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>[Title]</td>
-                        <td>[Subject]</td>
-                        <td><span class="status-badge status-completed">[Status]</span></td>
-                        <td><span class="score-badge">[Score]</span></td>
+                    <?php while($result=mysqli_fetch_assoc($results)){
+                        ?>
+                        <tr>
+                        <td><?php echo htmlspecialchars($result['title']) ?></td>
+                        <td><?php echo htmlspecialchars($result['subject'] ??'') ;?></td>
+                
+
+                        <td><span class="score-badge"><?php echo htmlspecialchars($result['score']) ?></span></td>
                     </tr>
+                    <?php } ?>
                 </tbody>
             </table>
         </div>

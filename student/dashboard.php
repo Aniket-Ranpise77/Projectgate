@@ -7,6 +7,12 @@ if ($_SESSION['role'] != 'student') {
     header("Location: ../public/home.php");
     exit();
 }
+$user=mysqli_query($conn, "SELECT * FROM `tblstud` WHERE uid = '{$_SESSION['uid']}'");
+$stud = mysqli_fetch_assoc($user);
+$project=mysqli_query($conn, "SELECT * FROM `tblproject` WHERE uid = '$stud[sid]'");
+$myproject = mysqli_fetch_assoc($project);
+$score=mysqli_query($conn, "SELECT AVG(score) AS average_score  FROM tblscore WHERE sid = '$stud[sid]'");
+$average_score = mysqli_fetch_assoc($score);
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -38,8 +44,8 @@ if ($_SESSION['role'] != 'student') {
     </div>
     <div id="pnsidebar" class="sidebar">
         <a id="Ibtnpro" href="profile.php">My Profile</a>
-        <a id="Ibtnproject" href="submitproject.php">Submit Project</a>
-        <a id="lbtnresult" href="results.php">My Results</a>
+        <a id="Ibtnproject" href="project.php">Submit Project</a>
+        <a id="lbtnresult" href="result.php">My Results</a>
         <a id="lbtnupwd" href="pwdchange.php">Password Change</a>
         <a id="Ibtlout" href="../public/logout.php">Log Out</a>
     </div>
@@ -51,17 +57,17 @@ if ($_SESSION['role'] != 'student') {
         
         <h3 style="color: #1d3160; margin-bottom: 15px;">Profile Overview</h3>
         <div class="statusbar">
-            <div class="card profile-card"><h3>Student Name</h3><span id="lblStudentName" class="metric">Not Set</span></div>
-            <div class="card profile-card"><h3>Student ID</h3><span id="IbISID" class="metric">Not Set</span></div>
-            <div class="card profile-card"><h3>Class</h3><span id="IbIClass" class="metric">Not Set</span></div>
-            <div class="card profile-card"><h3>Academic Year</h3><span id="lblAcademicYear" class="metric">Not Set</span></div>
+            <div class="card profile-card"><h3>Student Name</h3><span id="lblStudentName" class="metric"><?php echo htmlspecialchars($stud['sname']) ?></span></div>
+            <div class="card profile-card"><h3>Student ID</h3><span id="IbISID" class="metric"><?php echo htmlspecialchars($stud['sid']) ?></span></div>
+            <div class="card profile-card"><h3>Class</h3><span id="IbIClass" class="metric"><?php echo htmlspecialchars($stud['class']) ?></span></div>
+            <div class="card profile-card"><h3>Academic Year</h3><span id="lblAcademicYear" class="metric"><?php echo htmlspecialchars($stud['year']) ?></span></div>
         </div>
         
         <h3 style="color:#1d3160; margin-bottom: 15px;">Latest Project Status</h3>
         <div class="statusbar">
-            <div class="card project-card"><h3>My Project</h3><span id="lbiProject" class="metric">No Project Submitted</span></div>
+            <div class="card project-card"><h3>My Project</h3><span id="lbiProject" class="metric"><?php echo htmlspecialchars(mysqli_num_rows($project)); ?></span></div>
             <div class="card project-card"><h3>Status</h3><span id="lblProjectStatus" class="metric">N/A</span></div>
-            <div class="card result-card"><h3>My Result</h3><span id="lblResult" class="metric">Pending</span></div>
+            <div class="card result-card"><h3>My Result</h3><span id="lblResult" class="metric"><?php echo htmlspecialchars($average_score['average_score']); ?></span></div>
             <div class="card result-card"><h3>Assigned Faculty</h3><span id="lblFaculty" class="metric">Not Assigned</span></div>
         </div>
     </div>

@@ -7,6 +7,33 @@ if ($_SESSION['role'] != 'student') {
     header("Location: ../public/home.php");
     exit();
 }
+if($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['txtUsername'],$_POST['txtEmail'],$_POST['txtFname'],$_POST['txtLname'],$_POST['ddlGender'],$_POST['txtAge'],$_POST['ddlClass'])){
+    $fname=$_POST['txtFname'];
+    $uname=$_POST['txtUsername'];
+    $lname=$_POST['txtLname'];
+    $gender=$_POST['ddlGender'];
+    $age=$_POST['txtAge'];
+    $class=$_POST['ddlClass'];
+    $email=$_POST['txtEmail'];
+    $userdata =mysqli_query($conn,"UPDATE `user` set username='$uname',email ='$email' where uid ='{$_SESSION['uid']}'");
+    $studdata =mysqli_query($conn,"update tblstud set sname='$fname',lname='$lname',gender='$gender',age=$age,class='$class' where uid='{$_SESSION['uid']}'");
+    if($userdata && $studdata){
+        $message="Profile Updated !!";
+        updatemessage($message);
+    }
+    else{
+        $message="Erroe While Updating Profile :" .mysqli_error($conn);
+        updatemessage($message);
+    }
+}
+$student=mysqli_query($conn, "SELECT * FROM `tblstud` WHERE uid = '{$_SESSION['uid']}'");
+$user=mysqli_query($conn, "SELECT * FROM `user` WHERE uid = '{$_SESSION['uid']}'");
+$udata=mysqli_fetch_assoc($user);
+$stud = mysqli_fetch_assoc($student);
+function updatemessage($msg)
+{
+    echo "<script> alert($msg)</script>";
+}
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -28,7 +55,7 @@ if ($_SESSION['role'] != 'student') {
     </style>
 </head>
 <body> 
-<form id="form1">
+<form id="form1" method="POST">
     <div id="Panel1" class="topbar">
         <img id="logo" class="logo" alt="Project-Gate Logo" src="../Admin/img/logo_admin.png" />
         <div class="topbar-right">
@@ -41,8 +68,8 @@ if ($_SESSION['role'] != 'student') {
     <div id="pnsidebar" class="sidebar">
         <a id="Ibtndash" href="dashboard.php">Dashboard</a>
         <a id="Ibtnpro" href="profile.php" style="font-weight:bold; color:#ffeb3b;">My Profile</a>
-        <a id="Ibtnproject" href="submitproject.php">Submit Project</a>
-        <a id="Ibtnresult" href="results.php">My Results</a>
+        <a id="Ibtnproject" href="project.php">Submit Project</a>
+        <a id="Ibtnresult" href="result.php">My Results</a>
         <a id="Ibtnupwd" href="pwdchange.php">Password Change</a>
         <a id="Ibtlout" href="../public/logout.php">Log Out</a>
     </div>
@@ -52,39 +79,50 @@ if ($_SESSION['role'] != 'student') {
             <div class="form-body form-grid">
                 <div class="form-group">
                     <label id="IbISIDText" class="form-label">Student ID</label>
-                    <input type="text" id="txtSID" class="form-input" readonly />
+                    <input type="text" id="txtSID"  value="<?php echo htmlspecialchars($stud['sid']); ?>" class="form-input" readonly />
                 </div>
                 <div class="form-group">
                     <label id="IblUsername" class="form-label">Username</label>
-                    <input type="text" id="txtUsername" class="form-input" readonly />
+                    <input type="text" id="txtUsername" name="txtUsername" value="<?php echo htmlspecialchars($udata['username']); ?>" class="form-input" />
                 </div>
                 <div class="form-group full-width"> 
                     <label id="lblEmail" class="form-label">Email Address</label>
-                    <input type="email" id="txtEmail" class="form-input" required pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$" />
+                    <input type="email" id="txtEmail" name="txtEmail" value="<?php echo htmlspecialchars($udata['email']); ?>" class="form-input" required pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$" />
                 </div>
                 <div class="form-group">
                     <label id="IblFirstName" class="form-label">First Name</label>
-                    <input type="text" id="txtFirstName" class="form-input" required />
+                    <input type="text" id="txtFirstName" name="txtFname" value="<?php echo htmlspecialchars($stud['sname']); ?>" class="form-input" required />
                 </div>
                 <div class="form-group">
                     <label id="IblLastName" class="form-label">Last Name</label>
-                    <input type="text" id="txtLastName" class="form-input" required />
+                    <input type="text" id="txtLastName" name="txtLname" value="<?php echo htmlspecialchars($stud['lname']); ?>" class="form-input" required />
                 </div>
                 <div class="form-group">
                     <label id="IblGender" class="form-label">Gender</label>
-                    <input type="text" id="txtGender" class="form-input" required />
+                    <select id="ddlGender" name="ddlGender" class="form-input" required>
+                        <option value="">Select Gender</option>
+                        <option value="Male" <?php echo ($stud['gender'] === 'Male') ? 'selected' : ''; ?>>Male</option>
+                        <option value="Female" <?php echo ($stud['gender'] === 'Female') ? 'selected' : ''; ?>>Female</option>
+                        <option value="Other" <?php echo ($stud['gender'] === 'Other') ? 'selected' : ''; ?>>Other</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label id="lblAge" class="form-label">Age</label>
-                    <input type="number" id="txtAge" class="form-input" required min="10" max="100" />
+                    <input type="number" id="txtAge" name="txtAge" value="<?php echo htmlspecialchars($stud['age']); ?>" class="form-input" required min="10" max="100" />
                 </div>
                 <div class="form-group">
                     <label id="lblClass" class="form-label">Class/Semester</label>
-                    <input type="text" id="txtClass" class="form-input" required />
-                </div>
+                    <select id="ddlClass" name="ddlClass" class="form-input" required>
+                        <option value="">Select Class</option>
+                        <option value="1st Year" <?php echo ($stud['class'] === '1st Year') ? 'selected' : ''; ?>>1st Year</option>
+                        <option value="2nd Year" <?php echo ($stud['class'] === '2nd Year') ? 'selected' : ''; ?>>2nd Year</option>
+                        <option value="3rd Year" <?php echo ($stud['class'] === '3rd Year') ? 'selected' : ''; ?>>3rd Year</option>
+                    </select>
+                       </div>
+
                 <div class="form-group">
                     <label id="lblYear" class="form-label">Academic Year</label>
-                    <input type="number" id="txtYear" class="form-input" required min="2000" max="2100" />
+                    <input type="number" id="txtYear" name="txtYear" value="<?php echo htmlspecialchars($stud['year']) ?>" class="form-input" required min="2000" max="2100" readonly />
                 </div>
                 <div class="button-group">
                     <span id="IbiMessage" style="font-weight:bold; display:block; margin-bottom:10px;"></span>
